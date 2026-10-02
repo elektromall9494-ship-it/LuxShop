@@ -1,0 +1,41 @@
+name: LuxShop Trial APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "*.zip"
+      - ".github/workflows/build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Layihəni aç
+        run: unzip -o "LuxShop_Trial_Source.zip" -d luxshop
+
+      - name: APK hazırla
+        working-directory: luxshop
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LuxShop-Trial-APK
+          path: luxshop/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
